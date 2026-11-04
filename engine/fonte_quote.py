@@ -60,11 +60,15 @@ def main() -> int:
         print(f"Errore HTTP {e.code}: chiave non valida o limite raggiunto" if e.code in (401, 429) else f"Errore HTTP {e.code}")
         return 1
     esito = chiavi_da_elenco(sport)
-    for cod, ok in esito.items():
-        print(f"{cod:4s} {CHIAVI_SPORT[cod]:32s} {'OK' if ok else 'NON TROVATA'}")
+    righe = [f"{cod:4s} {CHIAVI_SPORT[cod]:32s} {'OK' if ok else 'NON TROVATA'}" for cod, ok in esito.items()]
     if not all(esito.values()):
-        print("Chiavi di calcio disponibili:", ", ".join(sorted(s["key"] for s in sport if s["key"].startswith("soccer_"))))
-    print({k: v for k, v in intest.items() if k.lower().startswith("x-requests")})
+        righe.append("Chiavi di calcio disponibili: " + ", ".join(sorted(s["key"] for s in sport if s["key"].startswith("soccer_"))))
+    righe.append(str({k: v for k, v in intest.items() if k.lower().startswith("x-requests")}))
+    print(*righe, sep="\n")
+    riassunto = os.environ.get("GITHUB_STEP_SUMMARY")      # pagina Summary della corsa su GitHub Actions
+    if riassunto:
+        with open(riassunto, "a", encoding="utf-8") as f:
+            f.write("### Verifica campionati The Odds API\n\n```\n" + "\n".join(righe) + "\n```\n")
     return 0 if all(esito.values()) else 1
 
 
