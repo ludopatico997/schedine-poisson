@@ -1,4 +1,4 @@
-# Passo 9 - Ogni giorno: scarica i dati, esegue i test, genera data/consigli.json e pubblica il sito su GitHub Pages.
+# Passo 9 - Ogni giorno: scarica i dati, esegue i test, genera data/consigli.json e pubblica il sito su GitHub Pages. (v2)
 # Nulla viene committato: il sito si costruisce sul server di GitHub e si pubblica come "artifact" di Pages.
 # La chiave di The Odds API sta SOLO nei Secrets del repository (nome: ODDS_API_KEY), mai nel codice.
 name: Consigli giornalieri
