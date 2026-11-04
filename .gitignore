@@ -1,0 +1,15 @@
+# Memoria privata del progetto
+STATO.md
+# CSV originali (licenza: non ridistribuire)
+data/raw/
+# Chiavi e ambienti
+.env
+*.key
+.venv/
+__pycache__/
+.DS_Store
+# Dati puliti derivati dai CSV originali
+data/pulito/
+# Sito costruito dal workflow (si pubblica come artifact, non si committa)
+_sito/
+.prova_sito/

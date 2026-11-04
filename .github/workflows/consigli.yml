@@ -1,0 +1,134 @@
+# Passo 9 - Ogni giorno: scarica i dati, esegue i test, genera data/consigli.json e pubblica il sito su GitHub Pages.
+# Nulla viene committato: il sito si costruisce sul server di GitHub e si pubblica come "artifact" di Pages.
+# La chiave di The Odds API sta SOLO nei Secrets del repository (nome: ODDS_API_KEY), mai nel codice.
+name: Consigli giornalieri
+
+on:
+  schedule:
+    - cron: "17 6 * * *"        # ogni giorno alle 06:17 UTC (07:17 o 08:17 in Italia); GitHub puo' ritardare anche di mezz'ora
+  workflow_dispatch:            # avvio a mano: Actions -> Consigli giornalieri -> Run workflow
+    inputs:
+      sorgente:
+        description: "Sorgente delle quote (demo = prova senza chiave e senza crediti)"
+        type: choice
+        options: [odds-api, demo]
+        default: odds-api
+      solo_verifica_chiavi:
+        description: "Solo controllo chiave e campionati (non consuma crediti, non pubblica nulla)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  SORGENTE: ${{ inputs.sorgente || 'odds-api' }}
+
+jobs:
+  costruisci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    outputs:
+      pubblica: ${{ steps.controllo.outputs.pubblica }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Controllo del segreto ODDS_API_KEY
+        if: env.SORGENTE == 'odds-api'
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          if [ -z "$ODDS_API_KEY" ]; then
+            echo "::error::Manca il segreto ODDS_API_KEY. Vai su Settings > Secrets and variables > Actions > New repository secret."
+            exit 1
+          fi
+
+      - name: Verifica chiave e campionati (gratis)
+        if: env.SORGENTE == 'odds-api'
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python -m engine.fonte_quote
+
+      - name: Fine (solo verifica)
+        if: ${{ inputs.solo_verifica_chiavi }}
+        run: echo "Solo verifica richiesta - nessuna pubblicazione."
+
+      - name: Test Python
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        run: python -m unittest discover -s . -t . -p "test_*.py"
+
+      - name: Test JavaScript
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        run: node --test app/js/*.test.js
+
+      - name: Settimana (per la cache dei CSV)
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        id: settimana
+        run: echo "w=$(date -u +%G-W%V)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache dei CSV storici (cosi' non si riscaricano ogni giorno)
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        uses: actions/cache@v4
+        with:
+          path: data/raw
+          key: raw-${{ steps.settimana.outputs.w }}
+          restore-keys: raw-
+
+      - name: Scarica e pulisci i dati storici
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        run: python engine/scarica_dati.py
+
+      - name: Genera consigli.json
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python engine/genera_consigli.py --sorgente "$SORGENTE"
+
+      - name: Controllo prima della pubblicazione
+        if: ${{ !inputs.solo_verifica_chiavi }}
+        id: controllo
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python engine/controlla_consigli.py data/consigli.json
+
+      - name: Prepara il sito
+        if: steps.controllo.outputs.pubblica == 'true'
+        run: |
+          mkdir -p _sito/data
+          cp -r app/. _sito/
+          cp data/consigli.json _sito/data/consigli.json
+          touch _sito/.nojekyll
+
+      - uses: actions/configure-pages@v5
+        if: steps.controllo.outputs.pubblica == 'true'
+
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.controllo.outputs.pubblica == 'true'
+        with:
+          path: _sito
+
+  pubblica:
+    needs: costruisci
+    if: needs.costruisci.outputs.pubblica == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

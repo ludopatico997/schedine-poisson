@@ -1,0 +1,15 @@
+{
+  "modello": "ens",
+  "parametri": {
+    "k": 20.0,
+    "vantaggio_casa": 40.0,
+    "regressione": 0.05,
+    "peso_elo": 0.5,
+    "dc": {
+      "emivita_giorni": 270.0,
+      "ridge": 3.0
+    }
+  },
+  "scelto_su": "2021-08-01 -> 2024-07-31",
+  "ll_1x2_taratura": 1.002982720304563
+}
