@@ -1,0 +1,156 @@
+/* Schedine Poisson - stile. Mobile first, chiaro/scuro automatici, nessun font esterno (funziona offline). */
+:root {
+  --carta: #e8edf0; --superficie: #f6f8f9; --inchiostro: #13212b; --tenue: #54646f; --linea: #c9d4da;
+  --accento: #0e6b88; --accento-fg: #ffffff;
+  --verde: #17703f; --verde-bg: #d6efe0; --giallo: #7a5300; --giallo-bg: #ffeeb8; --rosso: #a62a22; --rosso-bg: #f8d7d3;
+  --seg1: #0e6b88; --segx: #8fa1ad; --seg2: #13212b; --seg-fg: #ffffff;
+  --fondo-h: 0px; --raggio: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --carta: #0d1418; --superficie: #151e24; --inchiostro: #e3ebef; --tenue: #93a4af; --linea: #27343d;
+    --accento: #5cc0de; --accento-fg: #06232d;
+    --verde: #6fd79f; --verde-bg: #143626; --giallo: #f0c862; --giallo-bg: #3a2e0e; --rosso: #ff8e84; --rosso-bg: #42201d;
+    --seg1: #5cc0de; --segx: #4a5b66; --seg2: #e3ebef; --seg-fg: #0d1418;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--carta); color: var(--inchiostro);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: calc(var(--fondo-h) + 12px);
+}
+h1, h2, h3 { line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: 1.35rem; font-weight: 750; }
+h2 { font-size: 1.15rem; font-weight: 720; }
+h3 { font-size: 1rem; font-weight: 700; }
+p { margin: 0 0 .6em; }
+a { color: var(--accento); }
+.tenue { color: var(--tenue); }
+.piccolo { font-size: .82rem; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 3px solid var(--accento); outline-offset: 2px; border-radius: 4px; }
+
+.testata { padding: calc(env(safe-area-inset-top) + 14px) 16px 6px; max-width: 640px; margin: 0 auto; }
+.testata p { margin: 2px 0 0; font-size: .85rem; }
+main { max-width: 640px; margin: 0 auto; padding: 8px 16px 24px; outline: none; }
+
+/* ---- barra in basso: promemoria di gioco responsabile + schede ---- */
+.fondo { position: fixed; left: 0; right: 0; bottom: 0; background: var(--superficie); border-top: 1px solid var(--linea); z-index: 20; padding-bottom: env(safe-area-inset-bottom); }
+.gioco { max-width: 640px; margin: 0 auto; font-size: .76rem; color: var(--tenue); }
+.gioco summary { list-style: none; cursor: pointer; padding: 5px 16px; display: flex; gap: 8px; align-items: center; }
+.gioco summary::-webkit-details-marker { display: none; }
+.gioco summary::after { content: "Info"; margin-left: auto; color: var(--accento); font-weight: 650; }
+.gioco[open] summary::after { content: "Chiudi"; }
+.gioco p { padding: 0 16px 8px; margin: 0; font-size: .82rem; color: var(--inchiostro); }
+.schede { display: grid; grid-template-columns: repeat(4, 1fr); max-width: 640px; margin: 0 auto; }
+.schede a { text-align: center; padding: 11px 4px 10px; text-decoration: none; color: var(--tenue); font-weight: 650; font-size: .92rem; border-top: 3px solid transparent; }
+.schede a[aria-current="page"] { color: var(--inchiostro); border-top-color: var(--accento); }
+
+/* ---- avvisi e pulsanti ---- */
+.banner { border-radius: var(--raggio); padding: 10px 12px; margin: 10px 0; font-size: .9rem; background: var(--giallo-bg); color: var(--giallo); }
+.banner.rosso { background: var(--rosso-bg); color: var(--rosso); }
+.banner.info { background: var(--superficie); color: var(--inchiostro); border: 1px solid var(--linea); }
+.banner strong { font-weight: 720; }
+button, .pulsante { font: inherit; font-weight: 650; border: 0; border-radius: 8px; padding: 9px 14px; background: var(--accento); color: var(--accento-fg); cursor: pointer; text-decoration: none; display: inline-block; }
+button.secondario, .pulsante.secondario { background: transparent; color: var(--accento); box-shadow: inset 0 0 0 1.5px var(--accento); }
+button.leggero { background: transparent; color: var(--tenue); padding: 6px 8px; font-weight: 600; }
+button.pericolo { background: var(--rosso); color: var(--carta); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.azioni { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.vuoto { padding: 28px 4px; text-align: left; }
+.vuoto p { color: var(--tenue); max-width: 46ch; }
+
+.filtri { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; scrollbar-width: none; }
+.filtri button { white-space: nowrap; background: transparent; color: var(--tenue); box-shadow: inset 0 0 0 1px var(--linea); padding: 6px 12px; font-weight: 600; font-size: .88rem; }
+.filtri button[aria-pressed="true"] { background: var(--inchiostro); color: var(--carta); box-shadow: none; }
+
+/* ---- elenco partite ---- */
+.giorno { margin: 18px 0 2px; font-size: .95rem; font-weight: 700; }
+.partita { display: grid; grid-template-columns: 3.1rem 1fr 7.4rem; gap: 10px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--linea); color: inherit; text-decoration: none; }
+.partita .ora { font-size: .85rem; color: var(--tenue); }
+.partita .squadre { font-weight: 680; line-height: 1.25; }
+.partita .sotto { font-size: .78rem; color: var(--tenue); margin-top: 2px; }
+.barra3 { display: flex; height: 26px; border-radius: 6px; overflow: hidden; font-size: .72rem; font-weight: 700; }
+.barra3 span { display: grid; place-items: center; min-width: 0; color: var(--seg-fg); }
+.barra3 .s1 { background: var(--seg1); } .barra3 .sx { background: var(--segx); } .barra3 .s2 { background: var(--seg2); }
+.punto { display: inline-block; width: .6em; height: .6em; border-radius: 50%; margin-right: 4px; vertical-align: baseline; }
+.punto.verde { background: var(--verde); } .punto.giallo { background: var(--giallo); } .punto.rosso { background: var(--rosso); }
+
+/* ---- scheda partita ---- */
+.indietro { display: inline-block; margin: 6px 0 4px; text-decoration: none; font-weight: 650; }
+.intesta h2 { font-size: 1.3rem; }
+.intesta .meta { color: var(--tenue); font-size: .88rem; margin-top: 3px; }
+.regolo { margin: 14px 0 4px; }
+.regolo label { display: flex; justify-content: space-between; font-weight: 650; }
+.regolo input[type=range] { width: 100%; accent-color: var(--accento); }
+.gruppo { margin-top: 16px; }
+.gruppo > h3, .gruppo > summary { padding: 4px 0; }
+.gruppo > summary { cursor: pointer; font-weight: 700; }
+.riga { display: grid; grid-template-columns: 3.3rem 1fr 1fr 1fr 4.9rem; gap: 4px 6px; align-items: center; padding: 7px 0; border-top: 1px solid var(--linea); }
+.riga.intest { border-top: 0; font-size: .72rem; color: var(--tenue); padding: 2px 0; }
+.riga .nome { font-weight: 720; }
+.riga .q { text-align: right; font-weight: 680; font-variant-numeric: tabular-nums; }
+.riga .q small { display: block; font-weight: 500; font-size: .7rem; color: var(--tenue); }
+.riga .q.mod { color: var(--tenue); font-weight: 600; }
+.riga input { width: 100%; font: inherit; font-weight: 680; text-align: right; padding: 6px 7px; border-radius: 7px; border: 1.5px solid var(--linea); background: var(--superficie); color: var(--inchiostro); font-variant-numeric: tabular-nums; }
+.riga input:focus { border-color: var(--accento); outline: none; box-shadow: 0 0 0 2px var(--accento); }
+.riga .esito { grid-column: 1 / -1; font-size: .84rem; padding: 2px 0 4px; }
+.chip { display: inline-block; font-weight: 720; font-size: .8rem; padding: 2px 9px; border-radius: 99px; margin-right: 6px; }
+.chip.verde { background: var(--verde-bg); color: var(--verde); } .chip.giallo { background: var(--giallo-bg); color: var(--giallo); } .chip.rosso { background: var(--rosso-bg); color: var(--rosso); }
+.motivo { color: var(--tenue); }
+
+/* righello delle quote: dove cade la tua quota rispetto a modello, mercato e quota minima di valore */
+.righello { position: relative; height: 22px; margin: 7px 4px 3px; }
+.righello .asse { position: absolute; left: 0; right: 0; top: 10px; height: 2px; background: var(--linea); }
+.righello .zona { position: absolute; top: 5px; height: 12px; background: var(--verde-bg); border-radius: 3px; }
+.righello .m { position: absolute; top: 5px; width: 12px; height: 12px; margin-left: -6px; box-sizing: border-box; }
+.righello .m.mod { border: 2px solid var(--tenue); border-radius: 50%; background: var(--carta); }
+.righello .m.mer { background: var(--inchiostro); border-radius: 50%; }
+.righello .m.min { width: 2px; margin-left: -1px; top: 2px; height: 18px; background: var(--verde); }
+.righello .m.tua { width: 14px; height: 14px; margin-left: -7px; top: 4px; transform: rotate(45deg); border-radius: 2px; }
+.righello .m.tua.verde { background: var(--verde); } .righello .m.tua.giallo { background: var(--giallo); } .righello .m.tua.rosso { background: var(--rosso); }
+.legenda { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .76rem; color: var(--tenue); margin: 8px 0 2px; }
+.legenda i { display: inline-block; vertical-align: -2px; margin-right: 4px; }
+
+.incolla { margin-top: 14px; border: 1px solid var(--linea); border-radius: var(--raggio); background: var(--superficie); }
+.incolla > summary { cursor: pointer; font-weight: 700; padding: 11px 12px; }
+.incolla .dentro { padding: 0 12px 12px; }
+.incolla select, .incolla textarea { font: inherit; width: 100%; padding: 8px; border-radius: 7px; border: 1.5px solid var(--linea); background: var(--carta); color: var(--inchiostro); margin: 4px 0 8px; }
+.incolla .due { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.incolla ul { margin: 8px 0 0; padding-left: 18px; font-size: .86rem; }
+
+/* ---- consigli, giocate, conto ---- */
+.voce { padding: 12px 0; border-bottom: 1px solid var(--linea); }
+.voce .titolo { font-weight: 700; }
+.voce .dati { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: .88rem; color: var(--tenue); margin-top: 3px; }
+.voce .dati b { color: var(--inchiostro); font-weight: 700; }
+.puntata { font-weight: 750; }
+.riepilogo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 14px; margin: 10px 0 4px; }
+.riepilogo div { padding: 8px 0; border-top: 2px solid var(--linea); }
+.riepilogo .v { font-size: 1.3rem; font-weight: 760; font-variant-numeric: tabular-nums; }
+.riepilogo .e { font-size: .8rem; color: var(--tenue); }
+.pos { color: var(--verde); } .neg { color: var(--rosso); }
+.campo { display: grid; gap: 4px; margin: 10px 0; }
+.campo input[type=number] { font: inherit; padding: 8px; border-radius: 7px; border: 1.5px solid var(--linea); background: var(--superficie); color: var(--inchiostro); width: 9rem; }
+.sezione { margin-top: 24px; }
+.sezione > h2 { margin-bottom: 6px; }
+.lista-piana { margin: 0; padding-left: 18px; }
+
+/* ---- dialogo e avviso ---- */
+dialog { border: 0; border-radius: 14px; padding: 18px; max-width: min(92vw, 420px); background: var(--superficie); color: var(--inchiostro); box-shadow: 0 10px 40px rgba(0, 0, 0, .35); }
+dialog::backdrop { background: rgba(0, 0, 0, .45); }
+dialog h2 { margin-bottom: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--fondo-h) + 12px); background: var(--inchiostro); color: var(--carta); padding: 9px 16px; border-radius: 99px; font-weight: 650; font-size: .9rem; z-index: 30; max-width: 90vw; }
+
+@media (prefers-reduced-motion: no-preference) { .toast { animation: entra .18s ease-out; } @keyframes entra { from { opacity: 0; transform: translate(-50%, 6px); } } }
+@media (min-width: 560px) { .partita { grid-template-columns: 3.4rem 1fr 9rem; } }
+
+/* legenda del righello */
+.legenda .l { display: inline-block; width: 11px; height: 11px; box-sizing: border-box; vertical-align: -1px; margin-right: 5px; }
+.legenda .l-mod { border: 2px solid var(--tenue); border-radius: 50%; }
+.legenda .l-mer { background: var(--inchiostro); border-radius: 50%; }
+.legenda .l-min { width: 3px; background: var(--verde); }
+.legenda .l-tua { background: var(--accento); transform: rotate(45deg) scale(.85); border-radius: 2px; }
+.chip.aperta, .chip.annullata { background: var(--linea); color: var(--inchiostro); }

@@ -2,58 +2,46 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Schedine Poisson</title>
-<style>
-  :root { --bg:#f6f7f9; --fg:#1b1f24; --muted:#5f6b7a; --card:#fff; --line:#dfe3e8; --warn:#8a5a00; --warnbg:#fff4d6; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#111418; --fg:#e8ebef; --muted:#9aa5b1; --card:#1a1f26; --line:#2a313a; --warn:#f2c46b; --warnbg:#3a2f12; } }
-  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.45 system-ui, sans-serif; }
-  main { max-width:640px; margin:0 auto; padding:16px; }
-  h1 { font-size:1.3rem; margin:0 0 4px; }
-  .muted { color:var(--muted); font-size:.9rem; }
-  .box { background:var(--warnbg); color:var(--warn); border-radius:8px; padding:10px 12px; margin:12px 0; font-size:.9rem; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin:8px 0; }
-  .card b { display:block; }
-  .p { font-variant-numeric: tabular-nums; font-size:.9rem; color:var(--muted); }
-  h2 { font-size:1rem; margin:20px 0 4px; }
-</style>
+<meta name="description" content="Consigli per le schedine calcistiche: probabilità, quota minima di valore e puntata suggerita.">
+<meta name="theme-color" content="#E8EDF0" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D1418" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icone/favicon-32.png">
+<link rel="apple-touch-icon" href="icone/icona-apple-180.png">
+<link rel="stylesheet" href="css/stile.css">
 </head>
 <body>
-<main>
+<header class="testata">
   <h1>Schedine Poisson</h1>
-  <div class="muted" id="stato">Caricamento…</div>
-  <div class="box">Versione provvisoria: mostra solo le probabilità di riferimento. L'app completa (quote, valore, puntate, storico) arriva col passo 8.</div>
-  <div id="elenco"></div>
-  <div class="box" id="gioco"></div>
-</main>
-<script>
-(function () {
-  var stato = document.getElementById("stato"), elenco = document.getElementById("elenco"), gioco = document.getElementById("gioco");
-  function el(tag, testo, cls) { var e = document.createElement(tag); if (testo != null) e.textContent = testo; if (cls) e.className = cls; return e; }
-  function pc(x) { return Math.round(x * 100) + "%"; }
-  fetch("data/consigli.json", { cache: "no-store" }).then(function (r) {
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return r.json();
-  }).then(function (d) {
-    var gen = new Date(d.generato);
-    stato.textContent = d.partite.length + " partite · aggiornato " + gen.toLocaleString("it-IT") + (d.demo ? " · DATI DI PROVA" : "");
-    gioco.textContent = d.avviso_gioco || "";
-    var giorno = "";
-    d.partite.forEach(function (p) {
-      var g = new Date(p.inizio).toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
-      if (g !== giorno) { giorno = g; elenco.appendChild(el("h2", g)); }
-      var c = el("div", null, "card"), r = p.riferimento.probabilita;
-      c.appendChild(el("b", p.casa + " – " + p.ospite));
-      var riga = p.nome_campionato + " · 1 " + pc(r["1"]) + " · X " + pc(r["X"]) + " · 2 " + pc(r["2"]);
-      if (r["Over 2.5"] != null) riga += " · Over 2.5 " + pc(r["Over 2.5"]);
-      c.appendChild(el("span", riga, "p"));
-      elenco.appendChild(c);
-    });
-    if (!d.partite.length) elenco.appendChild(el("p", "Nessuna partita in programma.", "muted"));
-  }).catch(function (e) {
-    stato.textContent = "Impossibile leggere i consigli (" + e.message + ").";
-  });
-})();
-</script>
+  <p id="aggiornato" class="tenue">Caricamento…</p>
+</header>
+
+<main id="vista" tabindex="-1" aria-live="polite"></main>
+
+<footer class="fondo">
+  <details class="gioco" id="gioco">
+    <summary><span>Vietato ai minori di 18 anni. Il gioco può causare dipendenza.</span></summary>
+    <p>Gioca solo denaro che puoi permetterti di perdere. Queste sono stime, non garanzie: il margine del bookmaker è sempre un costo e il valore stimato è incerto. Se senti di non controllare il gioco, chiama il Telefono Verde Nazionale per il gioco d'azzardo: <a href="tel:800558822">800 55 88 22</a> (gratuito e anonimo).</p>
+  </details>
+  <nav class="schede" aria-label="Sezioni">
+    <a href="#/" data-tab="partite">Partite</a>
+    <a href="#/consigli" data-tab="consigli">Consigli</a>
+    <a href="#/giocate" data-tab="giocate">Giocate</a>
+    <a href="#/conto" data-tab="conto">Conto</a>
+  </nav>
+</footer>
+
+<dialog id="dialogo"><form method="dialog">
+  <h2 id="dialogo-titolo"></h2><p id="dialogo-testo"></p>
+  <div class="azioni"><button value="no" class="secondario">Annulla</button><button value="si" id="dialogo-ok"></button></div>
+</form></dialog>
+<div id="avviso" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="js/motore.js"></script>
+<script src="js/parser_quote.js"></script>
+<script src="js/archivio.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>

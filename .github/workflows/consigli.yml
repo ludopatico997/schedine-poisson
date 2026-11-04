@@ -110,7 +110,9 @@ jobs:
         run: |
           mkdir -p _sito/data
           cp -r app/. _sito/
+          rm -f _sito/js/*.test.js _sito/js/fixture_parita.json _sito/icone/genera_icone.py _sito/.gitkeep   # niente file di prova nel sito
           cp data/consigli.json _sito/data/consigli.json
+          sed -i "s/__VERSIONE__/${GITHUB_SHA::8}-$(date -u +%Y%m%d)/" _sito/sw.js
           touch _sito/.nojekyll
 
       - uses: actions/configure-pages@v5

@@ -21,3 +21,10 @@ Impostazione una tantum:
 3. Actions > Consigli giornalieri > Run workflow (prima con "solo_verifica_chiavi", poi con la sorgente `demo`, poi `odds-api`).
 
 Nota: GitHub disattiva i workflow programmati dei repository pubblici dopo 60 giorni senza attivita'; basta riattivarlo da Actions.
+
+## App (passo 8)
+`app/` e' la PWA: `index.html`, `css/stile.css`, `js/motore.js` (porting in JavaScript di mercati, riferimento e puntate; i test
+`app/js/motore.test.js` verificano che coincida col Python), `js/archivio.js` (bankroll, giocate, storico: solo nel browser),
+`js/parser_quote.js` ("incolla e leggi"), `js/app.js` (interfaccia), `sw.js` (uso offline), `manifest.webmanifest`, `icone/`.
+Prova in locale: `cd app && mkdir -p data && cp ../data/consigli_demo.json data/consigli.json && python3 -m http.server 8000`
+e apri http://localhost:8000. Se cambiano le formule in `engine/`: `python3 engine/genera_fixture_js.py` e `node --test app/js/*.test.js`.
